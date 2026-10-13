@@ -1564,7 +1564,7 @@
       'use strict';
 
       const CONFIG = {
-        buyUrl: '#',
+        buyUrl: 'https://mono-telegram-access.irina-kbts.workers.dev/',
         offerUrl: '#',
         timeZone: 'Europe/Kyiv',
         mobileMax: 767,
@@ -1585,8 +1585,39 @@
           });
         };
 
-        bind('[data-cta]', CONFIG.buyUrl, 'buyUrl');
         bind('[data-offer]', 'https://docs.google.com/document/d/1y10MePfmjB8y-eNbwAs3vzzrAhbkDh1ZDR6Dzd2hKGI/edit?usp=sharing', 'offerUrl');
+      }
+
+      /* Buy buttons ---------------------------------------------------------- */
+      function initBuy() {
+        const buttons = document.querySelectorAll('[data-cta]');
+        let busy = false;
+
+        const setBusy = value => {
+          busy = value;
+          buttons.forEach(b => {
+            b.style.opacity = value ? '.6' : '';
+            b.style.pointerEvents = value ? 'none' : '';
+          });
+        };
+
+        buttons.forEach(button => button.addEventListener('click', async event => {
+          event.preventDefault();
+          if (busy) return;
+          setBusy(true);
+          try {
+            const response = await fetch('https://mono-telegram-access.irina-kbts.workers.dev/create', { method: 'POST' });
+            const data = await response.json();
+            if (!response.ok || !data.pageUrl) throw new Error('create failed');
+            location.href = data.pageUrl;
+          } catch (error) {
+            setBusy(false);
+            alert('Не вдалося почати оплату. Спробуйте ще раз.');
+          }
+        }));
+
+        // кнопка «назад» со страницы оплаты может вернуть страницу из кэша с заблокированными кнопками
+        window.addEventListener('pageshow', event => { if (event.persisted) setBusy(false); });
       }
 
       /* "Starts tomorrow" date ----------------------------------------------- */
@@ -1847,6 +1878,7 @@
       }
 
       initLinks();
+      initBuy();
       initTomorrowDate();
       initReveal();
       initCompare();
