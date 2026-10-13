@@ -755,82 +755,6 @@
     /* ==========================================================================
        Before / after
        ========================================================================== */
-    .ba {
-      --pos: 66%;
-      position: relative;
-      width: 100%;
-      aspect-ratio: 987 / 1316;
-      overflow: hidden;
-      box-shadow: var(--shadow);
-      touch-action: pan-y;
-      -webkit-user-select: none;
-      user-select: none;
-    }
-
-    .ba__img {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .ba__img--top {
-      clip-path: inset(0 calc(100% - var(--pos)) 0 0);
-      transition: clip-path .1s ease-out;
-    }
-
-    .ba::before,
-    .ba::after {
-      content: "";
-      position: absolute;
-      left: var(--pos);
-      z-index: 4;
-      width: 4px;
-      margin-left: -2px;
-      background: #fff;
-      box-shadow: 0 0 4px rgba(0, 0, 0, .5);
-      pointer-events: none;
-      transition: left .1s ease-out;
-    }
-
-    .ba::before { top: 0; bottom: calc(50% + 23px); }
-    .ba::after { top: calc(50% + 23px); bottom: 0; }
-
-    .ba__handle {
-      position: absolute;
-      top: 50%;
-      left: var(--pos);
-      z-index: 5;
-      width: 54px;
-      height: 54px;
-      transform: translate(-50%, -50%);
-      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, .4));
-      pointer-events: none;
-      transition: left .1s ease-out;
-    }
-
-    .ba__range {
-      position: absolute;
-      inset: 0;
-      z-index: 10;
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      opacity: 0;
-      cursor: ew-resize;
-    }
-
-    .ba__range:focus-visible ~ .ba__handle {
-      outline: 2px solid #fff;
-      outline-offset: 2px;
-      border-radius: 50%;
-    }
-
-    .ba.is-dragging .ba__img--top,
-    .ba.is-dragging .ba__handle,
-    .ba.is-dragging::before,
-    .ba.is-dragging::after { transition: none; }
 
     .ba__tag {
       position: absolute;
@@ -849,6 +773,124 @@
 
     .ba__tag--left { left: 14px; }
     .ba__tag--right { right: 14px; }
+
+    /* Before / after slider — исправленная версия */
+
+    .ba {
+      --pos: 66%;
+      position: relative;
+      width: 100%;
+      aspect-ratio: 987 / 1316;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+
+      /* Разрешаем вертикальный скролл страницы */
+      touch-action: pan-y;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .ba__img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+    }
+
+    .ba__img--top {
+      clip-path: inset(0 calc(100% - var(--pos)) 0 0);
+      transition: clip-path .1s ease-out;
+    }
+
+    /* Полоса разделителя.
+      Зона взаимодействия немного шире видимой белой линии. */
+    .ba::before,
+    .ba::after {
+      content: "";
+      position: absolute;
+      left: var(--pos);
+      z-index: 4;
+
+      width: 16px;
+      margin-left: -8px;
+
+      /* Белая линия шириной 4 px внутри зоны шириной 16 px */
+      background: linear-gradient(
+        to right,
+        transparent 6px,
+        #fff 6px,
+        #fff 10px,
+        transparent 10px
+      );
+
+      pointer-events: auto;
+      cursor: ew-resize;
+      touch-action: none;
+      transition: left .1s ease-out;
+    }
+
+    .ba::before {
+      top: 0;
+      bottom: calc(50% + 23px);
+    }
+
+    .ba::after {
+      top: calc(50% + 23px);
+      bottom: 0;
+    }
+
+    /* Кружок управления */
+    .ba__handle {
+      position: absolute;
+      top: 50%;
+      left: var(--pos);
+      z-index: 6;
+      width: 54px;
+      height: 54px;
+      transform: translate(-50%, -50%);
+      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, .4));
+
+      cursor: ew-resize;
+      pointer-events: auto;
+      touch-action: none;
+      transition: left .1s ease-out;
+    }
+
+    /* Сохраняем input для клавиатуры и доступности.
+      Он больше не перекрывает всю картинку. */
+    .ba__range {
+      position: absolute;
+      top: 50%;
+      left: var(--pos);
+      z-index: 7;
+
+      width: 54px;
+      height: 54px;
+      margin: 0;
+      padding: 0;
+      transform: translate(-50%, -50%);
+
+      opacity: 0;
+      pointer-events: none;
+      cursor: ew-resize;
+    }
+
+    /* Фокус клавиатуры */
+    .ba__range:focus-visible ~ .ba__handle {
+      outline: 2px solid #fff;
+      outline-offset: 3px;
+      border-radius: 50%;
+    }
+
+    /* Во время перетаскивания отключаем анимацию */
+    .ba.is-dragging .ba__img--top,
+    .ba.is-dragging .ba__handle,
+    .ba.is-dragging::before,
+    .ba.is-dragging::after {
+      transition: none;
+    }
 
     @media (max-width: 767px) {
       .ba {
@@ -895,7 +937,7 @@
       display: flex;
       gap: var(--gap, 30px);
       will-change: transform;
-      transition: transform .7s var(--ease);
+      transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     .carousel__track.is-static { transition: none; }
@@ -1431,9 +1473,9 @@
         <div class="carousel reveal" id="carousel">
           <div class="carousel__view">
             <div class="carousel__track">
-              <div class="carousel__slide"><button class="shot" type="button" aria-label="Відкрити фото"><img src="./images/6a9c99e5b73dd7c18cb2f764_optimized_1080_c1080x1080-0x0.webp" alt="Результат учениці 1" draggable="false" loading="lazy" decoding="async"></button></div>
-              <div class="carousel__slide"><button class="shot" type="button" aria-label="Відкрити фото"><img src="./images/6a9c98762c5c428d5ab0322f_optimized.webp" alt="Результат учениці 2" draggable="false" loading="lazy" decoding="async"></button></div>
-              <div class="carousel__slide"><button class="shot" type="button" aria-label="Відкрити фото"><img src="./images/6aa07ed8c61e248c98afc1a0_optimized_1080_c1080x1080-0x0.webp" alt="Результат учениці 3" draggable="false" loading="lazy" decoding="async"></button></div>
+              <div class="carousel__slide"><button class="shot" type="button" aria-label="Відкрити фото"><img src="./images/6a9c99e5b73dd7c18cb2f764_optimized_1080_c1080x1080-0x0.webp" alt="Результат учениці 1" draggable="false" decoding="async"></button></div>
+              <div class="carousel__slide"><button class="shot" type="button" aria-label="Відкрити фото"><img src="./images/6a9c98762c5c428d5ab0322f_optimized.webp" alt="Результат учениці 2" draggable="false" decoding="async"></button></div>
+              <div class="carousel__slide"><button class="shot" type="button" aria-label="Відкрити фото"><img src="./images/6aa07ed8c61e248c98afc1a0_optimized_1080_c1080x1080-0x0.webp" alt="Результат учениці 3" draggable="false" decoding="async"></button></div>
             </div>
           </div>
           <button class="carousel__btn carousel__btn--prev" type="button" aria-label="Назад">
@@ -1831,20 +1873,145 @@
         items.forEach(el => observer.observe(el));
       }
 
-      /* Before / after slider ------------------------------------------------- */
+
+      /* Before / after slider — плавное начало перетаскивания */
+
       function initCompare() {
         document.querySelectorAll('.ba').forEach(root => {
-          const input = root.querySelector('.ba__range');
-          const update = () => root.style.setProperty('--pos', `${input.value}%`);
-          const startDrag = () => root.classList.add('is-dragging');
-          const endDrag = () => root.classList.remove('is-dragging');
+          if (root.dataset.compareInitialized === 'true') return;
+          root.dataset.compareInitialized = 'true';
 
-          input.addEventListener('input', update);
-          input.addEventListener('pointerdown', startDrag);
-          window.addEventListener('pointerup', endDrag);
-          window.addEventListener('pointercancel', endDrag);
-          update();
+          const input = root.querySelector('.ba__range');
+          const handle = root.querySelector('.ba__handle');
+
+          if (!input || !handle) return;
+
+          let dragging = false;
+          let activePointerId = null;
+          let startX = 0;
+          let startValue = 66;
+          let hasMoved = false;
+
+          // Минимальное движение до начала перетаскивания.
+          const DRAG_THRESHOLD = 3;
+
+          const clamp = value => Math.max(0, Math.min(100, value));
+
+          function update(value) {
+            const position = clamp(value);
+            input.value = String(position);
+            root.style.setProperty('--pos', `${position}%`);
+          }
+
+          function updateFromPointer(event) {
+            const rect = root.getBoundingClientRect();
+            if (!rect.width) return;
+
+            const x = event.clientX - rect.left;
+            update((x / rect.width) * 100);
+          }
+
+          function isOnDivider(event) {
+            const currentX =
+              root.getBoundingClientRect().left +
+              root.getBoundingClientRect().width *
+              (parseFloat(input.value) / 100);
+
+            const handleRect = handle.getBoundingClientRect();
+
+            const onHandle =
+              event.clientX >= handleRect.left - 2 &&
+              event.clientX <= handleRect.right + 2 &&
+              event.clientY >= handleRect.top - 2 &&
+              event.clientY <= handleRect.bottom + 2;
+
+            const tolerance =
+              event.pointerType === 'mouse' ? 8 : 10;
+
+            const onLine =
+              Math.abs(event.clientX - currentX) <= tolerance;
+
+            return onHandle || onLine;
+          }
+
+          function startDrag(event) {
+            if (event.pointerType === 'mouse' && event.button !== 0) return;
+            if (!isOnDivider(event)) return;
+
+            dragging = true;
+            hasMoved = false;
+            activePointerId = event.pointerId;
+
+            startX = event.clientX;
+            startValue = parseFloat(input.value) || 0;
+
+            root.classList.add('is-dragging');
+
+            try {
+              root.setPointerCapture(event.pointerId);
+            } catch (_) {}
+
+            // ВАЖНО: здесь не меняем позицию разделителя.
+            // Первое касание только начинает взаимодействие.
+            if (event.cancelable) event.preventDefault();
+          }
+
+          function moveDrag(event) {
+            if (!dragging || event.pointerId !== activePointerId) return;
+
+            const deltaX = event.clientX - startX;
+
+            // Не начинаем движение, пока палец или мышь
+            // не сместились хотя бы на несколько пикселей.
+            if (!hasMoved) {
+              if (Math.abs(deltaX) < DRAG_THRESHOLD) return;
+              hasMoved = true;
+            }
+
+            const rect = root.getBoundingClientRect();
+            if (!rect.width) return;
+
+            // Сохраняем точку захвата:
+            // разделитель движется относительно исходной позиции,
+            // а не прыгает под палец.
+            const deltaPercent = (deltaX / rect.width) * 100;
+            update(startValue + deltaPercent);
+
+            if (event.cancelable) event.preventDefault();
+          }
+
+          function endDrag(event) {
+            if (!dragging || event.pointerId !== activePointerId) return;
+
+            dragging = false;
+            activePointerId = null;
+            root.classList.remove('is-dragging');
+
+            try {
+              if (root.hasPointerCapture(event.pointerId)) {
+                root.releasePointerCapture(event.pointerId);
+              }
+            } catch (_) {}
+          }
+
+          root.addEventListener('pointerdown', startDrag);
+          root.addEventListener('pointermove', moveDrag);
+          root.addEventListener('pointerup', endDrag);
+          root.addEventListener('pointercancel', endDrag);
+          root.addEventListener('lostpointercapture', endDrag);
+
+          input.addEventListener('input', () => update(input.value));
+
+          update(input.value || 66);
         });
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCompare, {
+          once: true
+        });
+      } else {
+        initCompare();
       }
 
       /* FAQ accordion --------------------------------------------------------- */
@@ -1879,6 +2046,14 @@
         const track = root.querySelector('.carousel__track');
         const originals = [...track.children].map(slide => slide.cloneNode(true));
         const total = originals.length;
+
+        originals.forEach(slide => {
+          const img = slide.querySelector('img');
+          if (!img) return;
+
+          img.loading = 'eager';
+          img.fetchPriority = 'high';
+        });
 
         let perView = 0;
         let gap = 0;
@@ -1926,8 +2101,6 @@
         };
 
         const go = direction => {
-          if (busy) return;
-          busy = true;
           index += direction;
           render();
         };
@@ -1939,7 +2112,6 @@
           track.classList.remove('is-static');
 
           if (Math.abs(deltaX) > SWIPE_DISTANCE) {
-            busy = false;
             go(deltaX < 0 ? 1 : -1);
           } else {
             render();
@@ -1950,7 +2122,6 @@
 
         track.addEventListener('transitionend', event => {
           if (event.target !== track || event.propertyName !== 'transform') return;
-          busy = false;
 
           const pastEnd = index >= total + perView;
           if (!pastEnd && index >= perView) return;
